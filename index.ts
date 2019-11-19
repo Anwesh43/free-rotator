@@ -1,0 +1,12 @@
+const w : number = window.innerWidth
+const h : number = window.innerHeight
+const loopDelay : number = 30
+const circleSizeFactor : number = 4
+const arrowSizeFactor : number = 9
+const ballSizeFactor : number = 7
+const timerSizeFactor : number = 6
+const backColor : string = "#00C853"
+const circleColor : string = "#3F51B5"
+const arrowColor : string = "#E0E0E0"
+const ballColor : string = "#f44336"
+const timerColor : string = "white"
