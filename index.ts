@@ -12,10 +12,25 @@ const ballColor : string = "#f44336"
 const timerColor : string = "white"
 const arrowDelay : number = 50
 var ballCreateDelay : number = 1000
+const circleStrokeFactor : number = 60
+const arrowStrokeFactor : number = 80
 
 window.onresize = () => {
     w = window.innerWidth
     h = window.innerHeight
+}
+
+class DrawingUtil {
+
+    static drawCircularLoop(context : CanvasRenderingContext2D) {
+        const cSize : number = Math.min(w, h) / circleSizeFactor
+        context.strokeStyle = circleColor
+        context.lineCap = 'round'
+        context.lineWidth = Math.min(w, h) / circleStrokeFactor
+        context.beginPath()
+        context.arc(0, 0, cSize, 0, 2 * Math.PI)
+        context.stroke()
+    }
 }
 
 class Stage {
@@ -112,8 +127,6 @@ class Loop {
 
 Stage.init()
 
-const loop : Loop = new Loop()
-
 class Arrow {
 
     deg : number = 0
@@ -127,6 +140,9 @@ class Arrow {
     draw(context : CanvasRenderingContext2D) {
         const cSize : number = Math.min(w, h) / circleSizeFactor
         const arrowSize : number = Math.min(w, h) / arrowSizeFactor
+        context.strokeStyle = arrowColor
+        context.lineWidth = Math.min(w, h) / arrowStrokeFactor
+        context.lineCap = 'round'
         context.save()
         context.rotate(this.deg * (Math.PI / 180))
         context.save()
@@ -141,6 +157,10 @@ class Arrow {
         context.restore()
     }
 
+    toggle() {
+        this.dir *= -1
+    }
+
     static create(loop : Loop) : Arrow {
         const arrow = new Arrow()
         loop.add(() => {
@@ -150,4 +170,23 @@ class Arrow {
     }
 }
 
-const arrow = Arrow.create(loop)
+class Renderer {
+
+    loop : Loop = new Loop()
+    arrow : Arrow = Arrow.create(this.loop)
+
+    init() {
+        this.loop.start()
+    }
+
+
+
+    render(context : CanvasRenderingContext2D) {
+        DrawingUtil.drawCircularLoop(context)
+        this.arrow.draw(context)
+    }
+
+    handleTap() {
+        this.arrow.toggle()
+    }
+}
