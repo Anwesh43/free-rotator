@@ -109,3 +109,45 @@ class Loop {
         }
     }
 }
+
+Stage.init()
+
+const loop : Loop = new Loop()
+
+class Arrow {
+
+    deg : number = 0
+    dir : number = 1
+    arrowSpeed : number = 5
+
+    move() {
+        this.deg += this.arrowSpeed * this.dir
+    }
+
+    draw(context : CanvasRenderingContext2D) {
+        const cSize : number = Math.min(w, h) / circleSizeFactor
+        const arrowSize : number = Math.min(w, h) / arrowSizeFactor
+        context.save()
+        context.rotate(this.deg * (Math.PI / 180))
+        context.save()
+        context.translate(cSize, 0)
+        context.rotate(Math.PI * (1 - this.dir) / 2)
+        context.beginPath()
+        context.moveTo(-arrowSize / 2, -arrowSize)
+        context.lineTo(0, arrowSize)
+        context.lineTo(arrowSize / 2, -arrowSize)
+        context.stroke()
+        context.restore()
+        context.restore()
+    }
+
+    static create(loop : Loop) : Arrow {
+        const arrow = new Arrow()
+        loop.add(() => {
+            arrow.move()
+        }, arrowDelay)
+        return arrow
+    }
+}
+
+const arrow = Arrow.create(loop)
