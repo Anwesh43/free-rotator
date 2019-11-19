@@ -2,7 +2,7 @@ var w : number = window.innerWidth
 var h : number = window.innerHeight
 const loopDelay : number = 1
 const circleSizeFactor : number = 4
-const arrowSizeFactor : number = 9
+const arrowSizeFactor : number = 13
 const ballSizeFactor : number = 7
 const timerSizeFactor : number = 6
 const backColor : string = "#00C853"
@@ -33,39 +33,7 @@ class DrawingUtil {
     }
 }
 
-class Stage {
 
-    canvas : HTMLCanvasElement = document.createElement('canvas')
-    context : CanvasRenderingContext2D
-    renderer : Renderer = new Renderer()
-
-    initCanvas() {
-        this.canvas.width = w
-        this.canvas.height = h
-        this.context = this.canvas.getContext('2d')
-        this.renderer.init()
-        document.body.appendChild(this.canvas)
-    }
-
-    render() {
-        this.context.fillStyle = backColor
-        this.context.fillRect(0, 0, w, h)
-        this.renderer.render(this.context)
-    }
-
-    handleTap() {
-        this.canvas.onmousedown = () => {
-            this.renderer.handleTap()
-        }
-    }
-
-    static init() {
-        const stage : Stage = new Stage()
-        stage.initCanvas()
-        stage.render()
-        stage.handleTap()
-    }
-}
 
 class LoopObject {
 
@@ -91,16 +59,20 @@ class Loop {
     start() {
         if (!this.started) {
             this.started = true
+            console.log("started")
             this.interval = setInterval(() => {
                 this.execute()
+                console.log("executing")
             }, loopDelay)
         }
     }
 
-    add(cb : Function, delay : number) {
+    add(cb : Function, delay : number) : number {
         this.n++
         const time = new Date().getTime()
         const loopObject = new LoopObject(this.n, time, cb, delay)
+        this.loopObjects.push(loopObject)
+        return this.n
     }
 
     stop() {
@@ -128,7 +100,7 @@ class Loop {
     }
 }
 
-Stage.init()
+
 
 class Arrow {
 
@@ -153,7 +125,7 @@ class Arrow {
         context.rotate(Math.PI * (1 - this.dir) / 2)
         context.beginPath()
         context.moveTo(-arrowSize / 2, -arrowSize)
-        context.lineTo(0, arrowSize)
+        context.lineTo(0, 0)
         context.lineTo(arrowSize / 2, -arrowSize)
         context.stroke()
         context.restore()
@@ -176,20 +148,66 @@ class Arrow {
 class Renderer {
 
     loop : Loop = new Loop()
-    arrow : Arrow = Arrow.create(this.loop)
+    arrow : Arrow
 
-    init() {
+    constructor(cb : Function) {
+        this.init(cb)
+    }
+
+    init(cb : Function) {
         this.loop.start()
+        this.arrow = Arrow.create(this.loop)
+        this.loop.add(cb, loopDelay)
     }
 
 
 
     render(context : CanvasRenderingContext2D) {
+        context.save()
+        context.translate(w / 2, h / 2)
         DrawingUtil.drawCircularLoop(context)
         this.arrow.draw(context)
+        context.restore()
     }
 
     handleTap() {
         this.arrow.toggle()
     }
 }
+
+class Stage {
+
+    canvas : HTMLCanvasElement = document.createElement('canvas')
+    context : CanvasRenderingContext2D
+    renderer : Renderer = new Renderer(() => {
+        this.render()
+    })
+
+    initCanvas() {
+        this.canvas.width = w
+        this.canvas.height = h
+        this.context = this.canvas.getContext('2d')
+        document.body.appendChild(this.canvas)
+    }
+
+    render() {
+        this.context.fillStyle = backColor
+        this.context.fillRect(0, 0, w, h)
+        this.renderer.render(this.context)
+    }
+
+    handleTap() {
+        this.canvas.onmousedown = () => {
+            this.renderer.handleTap()
+        }
+    }
+
+    static init() {
+        const stage : Stage = new Stage()
+        stage.initCanvas()
+        stage.render()
+        stage.handleTap()
+    }
+}
+
+Stage.init()
