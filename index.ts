@@ -12,6 +12,7 @@ const ballColor : string = "#f44336"
 const timerColor : string = "white"
 const arrowDelay : number = 50
 var ballCreateDelay : number = 1000
+var ballUpdateDelay : number = 20
 const circleStrokeFactor : number = 60
 const arrowStrokeFactor : number = 80
 const ballScaleGap : number = 0.02
@@ -235,4 +236,29 @@ class BallState {
     }
 }
 
+class Ball {
+
+    ballState : BallState = new BallState()
+    loopIndex : number
+
+    draw(context : CanvasRenderingContext2D) {
+        context.fillStyle = ballColor
+        context.beginPath()
+        context.arc(0, 0, ballSizeFactor * this.ballState.scale, 0, 2 * Math.PI)
+        context.fill()
+    }
+
+    update(cb : Function) {
+        this.ballState.update(cb)
+    }
+
+    startUpdating(cb : Function, loop : Loop) {
+        this.ballState.startUpdating(cb)
+        this.loopIndex = loop.add(() => {
+            this.update(() => {
+                loop.remove(this.loopIndex)
+            })
+        }, ballUpdateDelay)
+    }
+}
 Stage.init()
