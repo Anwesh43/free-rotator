@@ -3,7 +3,7 @@ var h : number = window.innerHeight
 const loopDelay : number = 1
 const circleSizeFactor : number = 4
 const arrowSizeFactor : number = 13
-const ballSizeFactor : number = 7
+const ballSizeFactor : number = 20
 const timerSizeFactor : number = 6
 const backColor : string = "#00C853"
 const circleColor : string = "#3F51B5"
@@ -11,7 +11,7 @@ const arrowColor : string = "#E0E0E0"
 const ballColor : string = "#f44336"
 const timerColor : string = "white"
 const arrowDelay : number = 50
-var ballCreateDelay : number = 1000
+var ballCreateDelay : number = 3000
 var ballUpdateDelay : number = 20
 const circleStrokeFactor : number = 60
 const arrowStrokeFactor : number = 80
@@ -151,6 +151,7 @@ class Renderer {
 
     loop : Loop = new Loop()
     arrow : Arrow
+    ballContainer : BallContainer = new BallContainer(this.loop)
 
     constructor(cb : Function) {
         this.init(cb)
@@ -169,6 +170,7 @@ class Renderer {
         context.translate(w / 2, h / 2)
         DrawingUtil.drawCircularLoop(context)
         this.arrow.draw(context)
+        this.ballContainer.draw(context)
         context.restore()
     }
 
@@ -240,12 +242,22 @@ class Ball {
 
     ballState : BallState = new BallState()
     loopIndex : number
+    deg : number
 
+    constructor() {
+        this.deg = Math.PI * 2 * Math.random()
+        console.log(`rotation is ${this.deg}`)
+    }
     draw(context : CanvasRenderingContext2D) {
+        const cSize : number = Math.min(w, h) / circleSizeFactor
+        const r : number = Math.min(w, h) / ballSizeFactor
         context.fillStyle = ballColor
+        context.save()
+        context.rotate(this.deg)
         context.beginPath()
-        context.arc(0, 0, ballSizeFactor * this.ballState.scale, 0, 2 * Math.PI)
+        context.arc(cSize, 0, r * this.ballState.scale, 0, 2 * Math.PI)
         context.fill()
+        context.restore()
     }
 
     update(cb : Function) {
@@ -266,19 +278,24 @@ class BallContainer {
 
     balls : Array<Ball> = new Array()
     loopIndex : number
-
+    deg : number = Math.random() * 2 * Math.PI
     constructor(private loop : Loop) {
         this.startCreating(this.loop)
+        console.log(`ball's rotation is `)
+
     }
 
     draw(context : CanvasRenderingContext2D) {
+        context.save()
         this.balls.forEach((ball) => {
             ball.draw(context)
         })
+        context.restore()
     }
 
     create() {
         const ball = new Ball()
+        this.balls.push(ball)
         ball.startUpdating(() => {
 
         }, this.loop)
