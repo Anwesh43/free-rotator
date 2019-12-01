@@ -261,4 +261,33 @@ class Ball {
         }, ballUpdateDelay)
     }
 }
+
+class BallContainer {
+
+    balls : Array<Ball> = new Array()
+    loopIndex : number
+
+    constructor(private loop : Loop) {
+        this.startCreating(this.loop)
+    }
+
+    draw(context : CanvasRenderingContext2D) {
+        this.balls.forEach((ball) => {
+            ball.draw(context)
+        })
+    }
+
+    create() {
+        const ball = new Ball()
+        ball.startUpdating(() => {
+
+        }, this.loop)
+    }
+
+    startCreating(loop : Loop) {
+        this.loopIndex = loop.add(() => {
+            this.create()
+        }, ballCreateDelay)
+    }
+}
 Stage.init()
