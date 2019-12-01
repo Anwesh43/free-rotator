@@ -14,6 +14,7 @@ const arrowDelay : number = 50
 var ballCreateDelay : number = 1000
 const circleStrokeFactor : number = 60
 const arrowStrokeFactor : number = 80
+const ballScaleGap : number = 0.02
 
 window.onresize = () => {
     w = window.innerWidth
@@ -207,6 +208,30 @@ class Stage {
         stage.initCanvas()
         stage.render()
         stage.handleTap()
+    }
+}
+
+class BallState {
+
+    scale : number = 0
+    dir : number = 0
+    prevScale : number = 0
+
+    update(cb : Function) {
+        this.scale += ballScaleGap * this.dir
+        if (Math.abs(this.scale - this.prevScale) > 1) {
+            this.scale = this.prevScale + this.dir
+            this.dir = 0
+            this.prevScale = this.scale
+            cb()
+        }
+    }
+
+    startUpdating(cb : Function) {
+        if (this.dir == 0) {
+            this.dir = 1 - 2 * this.prevScale
+            cb()
+        }
     }
 }
 
